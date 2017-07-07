@@ -91,29 +91,35 @@ def get_exif(image):
         return exifread.process_file(fd, details=False)
 
 
-def parse_taken_date(tags):
-    if 'EXIF DateTimeOriginal' in tags:
-        taken_tag = tags['EXIF DateTimeOriginal']
-        return datetime.strptime(str(taken_tag) + 'UTC', '%Y:%m:%d %H:%M:%S%Z')
+class Image:
+    def __init__(self, image_path):
+        self.path = image_path
+        self.exif_tags = get_exif(self.path)
+
+    @property
+    def size(self):
+        if 'EXIF ExifImageWidth' in self.exif_tags and 'EXIF ExifImageLength' in self.exif_tags:
+            return Dimension(self.exif_tags['EXIF ExifImageWidth'].values[0],
+                             self.exif_tags['EXIF ExifImageLength'].values[0])
+        return None
+
+    @property
+    def taken_date(self):
+        if 'EXIF DateTimeOriginal' in self.exif_tags:
+            taken_tag = self.exif_tags['EXIF DateTimeOriginal']
+            return datetime.strptime(str(taken_tag) + 'UTC', '%Y:%m:%d %H:%M:%S%Z')
+        return None
 
 
-def get_dimensions(tags):
-    if 'EXIF ExifImageWidth' in tags and 'EXIF ExifImageLength' in tags:
-        return Dimension(tags['EXIF ExifImageWidth'].values[0],
-                         tags['EXIF ExifImageLength'].values[0])
-
-
-def process_image(image):
-    tags = get_exif(image)
-    taken_date = parse_taken_date(tags)
-    if not taken_date:
-        print('Failed to parse taken_date from %s' % image, file=sys.stderr)
+def process_image(image_path):
+    image = Image(image_path)
+    if not image.taken_date:
+        print('Failed to parse taken_date from %s' % image.path, file=sys.stderr)
         return
-    size = get_dimensions(tags)
-    if not size:
-        print('Failed to parse size of %s' % image, file=sys.stderr)
+    if not image.size:
+        print('Failed to parse size of %s' % image.path, file=sys.stderr)
         return
-    relative_path = path.relpath(image, args.input)
+    relative_path = path.relpath(image.path, args.input)
     relative_dir = path.dirname(relative_path)
 
     create_folders(relative_dir)
@@ -122,38 +128,27 @@ def process_image(image):
     thumb_size = create_thumb(image, relative_dir)
     create_original(image, relative_dir)
 
-    return create_datadto(relative_path, scaledown_size, thumb_size, size, taken_date)
+    return create_datadto(relative_path, scaledown_size, thumb_size, image.size, image.taken_date)
 
 
-def create_original(image, relative_dir):
-    shutil.copy(image, path.join(args.output, 'files', relative_dir))
+def create_original(image: Image, relative_dir):
+    shutil.copy(image.path, path.join(args.output, 'files', relative_dir))
 
 
-class Image:
-    def __init__(self, image_path):
-        self.path = image_path
-        self.exif_tags = get_exif(self.path)
-
-    @property
-    def size(self):
-        return get_dimensions(self.exif_tags)
-
-
-def create_thumb(image, relative_dir):
+def create_thumb(image: Image, relative_dir):
     thumb_quality = 90
     min_thumb_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
     max_thumb_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
-    destination = path.join(args.output, 'thumbs', relative_dir, path.basename(image))
-    size = get_dimensions(get_exif(image))
+    destination = path.join(args.output, 'thumbs', relative_dir, path.basename(image.path))
 
-    if size.x / size.y < min_thumb_size.x / min_thumb_size.y:
-        thumb_ratio = min_thumb_size.x / size.x
+    if image.size.x / image.size.y < min_thumb_size.x / min_thumb_size.y:
+        thumb_ratio = min_thumb_size.x / image.size.x
     else:
-        thumb_ratio = min_thumb_size.y / size.y
+        thumb_ratio = min_thumb_size.y / image.size.y
 
-    sthumb = Dimension(max(round(size.x * thumb_ratio), min_thumb_size.x),
-                       max(round(size.y * thumb_ratio), min_thumb_size.y))
+    sthumb = Dimension(max(round(image.size.x * thumb_ratio), min_thumb_size.x),
+                       max(round(image.size.y * thumb_ratio), min_thumb_size.y))
 
     mthumb = Dimension(min(max_thumb_size.x, sthumb.x), min(max_thumb_size.y, sthumb.y))
 
@@ -170,7 +165,7 @@ def create_thumb(image, relative_dir):
     cy = clamp(0, dy, int(center.y * sthumb.y - sthumb.y / 2 + dy / 2))
 
     cmd = ['convert',
-           '-quiet', image,
+           '-quiet', image.path,
            '-gamma', '0.454545',
            '-resize', '%sx%s!' % (sthumb.x, sthumb.y),
            '-gravity', 'NorthWest',
@@ -189,15 +184,15 @@ def execute(cmd):
     return subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
 
 
-def create_scaledown(image, relative_dir):
+def create_scaledown(image: Image, relative_dir):
     max_full_size = Dimension(1600, 1200)
     image_quality = 90
 
-    destination = path.join(args.output, 'imgs', relative_dir, path.basename(image))
+    destination = path.join(args.output, 'imgs', relative_dir, path.basename(image.path))
 
     cmd = ['convert',
            '-quiet',
-           image,
+           image.path,
            '-gamma', '0.454545',
            '-geometry', '%sx%s>' % (max_full_size.x, max_full_size.y),
            '-print', '%w %h',
