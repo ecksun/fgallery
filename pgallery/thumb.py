@@ -7,7 +7,7 @@ min_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
 max_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
 
-def create_thumb(image: Image, output_folder, relative_dir):
+def create(image: Image, output_folder, relative_dir):
     destination = path.join(output_folder, 'thumbs', relative_dir, path.basename(image.path))
 
     if image.size.x / image.size.y < min_size.x / min_size.y:

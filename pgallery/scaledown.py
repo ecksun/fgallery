@@ -3,7 +3,7 @@ from pgallery.sys import execute
 from pgallery.image import Image, Dimension
 
 
-def create_scaledown(image: Image, output_folder, relative_dir):
+def create(image: Image, output_folder, relative_dir):
     max_full_size = Dimension(1600, 1200)
     image_quality = 90
 

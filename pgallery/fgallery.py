@@ -4,12 +4,9 @@ import json
 import os
 import shutil
 from os import path
-from pgallery import thumb
+from pgallery import thumb, scaledown, original
 from pgallery.data_json import create_datadto, create_rootdto, create_thumbdto
 from pgallery.image import Image, Dimension
-from pgallery.original import create_original
-from pgallery.scaledown import create_scaledown
-from pgallery.thumb import create_thumb
 
 
 def copy_template_files(destination):
@@ -25,9 +22,9 @@ def process_image(image: Image, input_dir, output_dir):
 
     create_folders(output_dir, relative_dir)
 
-    scaledown_size = create_scaledown(image, output_dir, relative_dir)
-    thumb_size = create_thumb(image, output_dir, relative_dir)
-    create_original(image, output_dir, relative_dir)
+    scaledown_size = scaledown.create(image, output_dir, relative_dir)
+    thumb_size = thumb.create(image, output_dir, relative_dir)
+    original.create(image, output_dir, relative_dir)
 
     return create_datadto(relative_path, scaledown_size, thumb_size, image.size, image.taken_date)
 
