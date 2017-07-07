@@ -44,6 +44,12 @@ class Image:
 
 
 class ScaledownImage(Image):
-    def __init__(self, image: Image, scaledown_path, size):
+    def __init__(self, image: Image, scaledown_path, size: Dimension):
         super(ScaledownImage, self).__init__(image.original.path, image.exif_tags)
         self.scaledown = ImageFile(scaledown_path, size)
+
+
+class ThumbImage(ScaledownImage):
+    def __init__(self, image: ScaledownImage, thumb_path, size: Dimension):
+        super(ThumbImage, self).__init__(image, image.scaledown.path, image.scaledown.size)
+        self.thumb = ImageFile(thumb_path, size)

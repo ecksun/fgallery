@@ -4,9 +4,9 @@ import json
 import os
 import shutil
 from os import path
-from pgallery import thumb, scaledown, original
+from pgallery import thumb, scaledown, original, blur
 from pgallery.data_json import create_datadto, create_rootdto, create_thumbdto
-from pgallery.image import Image, Dimension
+from pgallery.image import Image
 
 
 def copy_template_files(destination):
@@ -23,15 +23,16 @@ def process_image(image: Image, input_dir, output_dir):
     create_folders(output_dir, relative_dir)
 
     scaledown_image = scaledown.create(image, output_dir, relative_dir)
-    thumb_size = thumb.create(scaledown_image, output_dir, relative_dir)
+    thumb_image = thumb.create(scaledown_image, output_dir, relative_dir)
     original.create(image, output_dir, relative_dir)
+    blur.create(thumb_image, output_dir, relative_dir)
 
-    return create_datadto(relative_path, scaledown_image.scaledown.size, thumb_size, image.size,
-                          image.taken_date)
+    return create_datadto(relative_path, scaledown_image.scaledown.size, thumb_image.thumb.size,
+                          image.size, image.taken_date)
 
 
 def create_folders(output_dir, target_dir):
-    for directory in ('imgs', 'thumbs', 'files'):
+    for directory in ('imgs', 'thumbs', 'files', 'blurs'):
         os.makedirs(path.join(output_dir, directory, target_dir), exist_ok=True)
 
 
@@ -41,7 +42,7 @@ def process_images(input_dir, output_dir, images: [Image]):
     return create_rootdto(images=datas,
                           thumb=create_thumbdto(thumb.min_size,
                                                 thumb.max_size),
-                          blur=Dimension(100, 200))
+                          blur=blur.backsize)
 
 
 def process_and_save(images: [Image], input_dir, output_dir):

@@ -1,5 +1,5 @@
 from os import path
-from pgallery.image import Dimension, ScaledownImage
+from pgallery.image import Dimension, ScaledownImage, ThumbImage
 from pgallery.sys import execute
 
 thumb_quality = 90
@@ -46,4 +46,4 @@ def create(image: ScaledownImage, output_folder, relative_dir):
            destination
            ]
     execute(cmd)
-    return mthumb
+    return ThumbImage(image, destination, mthumb)
