@@ -3,11 +3,11 @@ import sys
 import os
 import shutil
 from os import path
-from pgallery.config import config
+from pgallery.config import Config
 from pgallery.image import Image
 
 
-def create(image: Image, output_dir, relative_dir):
+def create(image: Image, output_dir, relative_dir, config: Config):
     destination = path.join(output_dir, 'files', relative_dir,
                             path.basename(image.original.path))
 

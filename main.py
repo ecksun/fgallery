@@ -4,7 +4,7 @@ import sys
 import os
 from os import path
 from pgallery import fgallery
-from pgallery.config import config
+from pgallery.config import Config
 from pgallery.image import Image
 
 parser = argparse.ArgumentParser(description='Process some integers.')
@@ -42,12 +42,11 @@ def valid_image(image: Image):
     return True
 
 
-def main():
-    images = [Image.from_path(image_path) for image_path in images_to_process(args.input)]
+def main(config):
+    images = [Image.from_path(image_path) for image_path in images_to_process(config.input_folder)]
     valid_images = [image for image in images if valid_image(image)]
     print(dir(fgallery))
-    fgallery.copy_template_files(args.output)
-    fgallery.process_and_save(valid_images, args.input, args.output)
+    fgallery.copy_template_files(config.output_folder)
+    fgallery.process_and_save(valid_images, config)
 
-config.set_args(args)
-main()
+main(Config(args))

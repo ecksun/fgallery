@@ -1,10 +1,15 @@
 #!/usr/bin/python3
 import json
 
+from multiprocessing.pool import Pool
+
+from functools import partial
+
 import os
 import shutil
 from os import path
 from pgallery import thumb, scaledown, original, blur
+from pgallery.config import Config
 from pgallery.data_json import create_datadto, create_rootdto, create_thumbdto
 from pgallery.image import Image
 
@@ -16,16 +21,16 @@ def copy_template_files(destination):
     shutil.copytree(template_dir, destination)
 
 
-def process_image(image: Image, input_dir, output_dir):
-    relative_path = path.relpath(image.original.path, input_dir)
+def process_image(image: Image, config: Config):
+    relative_path = path.relpath(image.original.path, config.input_folder)
     relative_dir = path.dirname(relative_path)
 
-    create_folders(output_dir, relative_dir)
+    create_folders(config.output_folder, relative_dir)
 
-    scaledown_image = scaledown.create(image, output_dir, relative_dir)
-    thumb_image = thumb.create(scaledown_image, output_dir, relative_dir)
-    original.create(image, output_dir, relative_dir)
-    blur.create(thumb_image, output_dir, relative_dir)
+    scaledown_image = scaledown.create(image, config.output_folder, relative_dir)
+    thumb_image = thumb.create(scaledown_image, config.output_folder, relative_dir)
+    original.create(image, config.output_folder, relative_dir, config)
+    blur.create(thumb_image, config.output_folder, relative_dir)
 
     return create_datadto(relative_path, scaledown_image.scaledown.size, thumb_image.thumb.size,
                           image.size, image.taken_date)
@@ -36,8 +41,11 @@ def create_folders(output_dir, target_dir):
         os.makedirs(path.join(output_dir, directory, target_dir), exist_ok=True)
 
 
-def process_images(input_dir, output_dir, images: [Image]):
-    datas = [process_image(image, input_dir, output_dir) for image in images]
+def process_images(config: Config, images: [Image]):
+    process = partial(process_image, config=config)
+    # datas = list(map(process, images))
+    with Pool(processes=None) as p:
+        datas = (p.map(process, images))
 
     return create_rootdto(images=datas,
                           thumb=create_thumbdto(thumb.min_size,
@@ -45,8 +53,8 @@ def process_images(input_dir, output_dir, images: [Image]):
                           blur=blur.backsize)
 
 
-def process_and_save(images: [Image], input_dir, output_dir):
-    data_dto = process_images(input_dir, output_dir, images)
+def process_and_save(images: [Image], config: Config):
+    data_dto = process_images(config, images)
 
-    with open(path.join(output_dir, 'data.json'), mode='w', encoding='utf-8') as f:
+    with open(path.join(config.output_folder, 'data.json'), mode='w', encoding='utf-8') as f:
         f.write(json.dumps(data_dto))
