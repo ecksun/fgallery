@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 from os import path
+from pgallery import thumb
 from pgallery.data_json import create_datadto, create_rootdto, create_thumbdto
 from pgallery.image import Image, Dimension
 from pgallery.original import create_original
@@ -40,8 +41,8 @@ def process_images(input_dir, output_dir, images: [Image]):
     datas = [process_image(image, input_dir, output_dir) for image in images]
 
     return create_rootdto(images=datas,
-                          thumb=create_thumbdto(Dimension(100, 100),
-                                                Dimension(200, 200)),
+                          thumb=create_thumbdto(thumb.min_size,
+                                                thumb.max_size),
                           blur=Dimension(100, 200))
 
 

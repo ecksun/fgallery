@@ -3,22 +3,22 @@ from pgallery.sys import execute
 from pgallery.image import Image, Dimension
 
 thumb_quality = 90
-min_thumb_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
-max_thumb_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
+min_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
+max_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
 
 def create_thumb(image: Image, output_folder, relative_dir):
     destination = path.join(output_folder, 'thumbs', relative_dir, path.basename(image.path))
 
-    if image.size.x / image.size.y < min_thumb_size.x / min_thumb_size.y:
-        thumb_ratio = min_thumb_size.x / image.size.x
+    if image.size.x / image.size.y < min_size.x / min_size.y:
+        thumb_ratio = min_size.x / image.size.x
     else:
-        thumb_ratio = min_thumb_size.y / image.size.y
+        thumb_ratio = min_size.y / image.size.y
 
-    sthumb = Dimension(max(round(image.size.x * thumb_ratio), min_thumb_size.x),
-                       max(round(image.size.y * thumb_ratio), min_thumb_size.y))
+    sthumb = Dimension(max(round(image.size.x * thumb_ratio), min_size.x),
+                       max(round(image.size.y * thumb_ratio), min_size.y))
 
-    mthumb = Dimension(min(max_thumb_size.x, sthumb.x), min(max_thumb_size.y, sthumb.y))
+    mthumb = Dimension(min(max_size.x, sthumb.x), min(max_size.y, sthumb.y))
 
     # face/center detection
     center = Dimension(0.5, 0.5)
