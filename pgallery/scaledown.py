@@ -7,11 +7,12 @@ def create(image: Image, output_folder, relative_dir):
     max_full_size = Dimension(1600, 1200)
     image_quality = 90
 
-    destination = path.join(output_folder, 'imgs', relative_dir, path.basename(image.path))
+    destination = path.join(output_folder, 'imgs', relative_dir,
+                            path.basename(image.original.path))
 
     cmd = ['convert',
            '-quiet',
-           image.path,
+           image.original.path,
            '-gamma', '0.454545',
            '-geometry', '%sx%s>' % (max_full_size.x, max_full_size.y),
            '-print', '%w %h',
@@ -20,7 +21,7 @@ def create(image: Image, output_folder, relative_dir):
            '-quality',
            str(image_quality),
            destination
-    ]
+           ]
     completed_process = execute(cmd)
     (width_bytes, height_bytes) = completed_process.stdout.split(b' ')
 

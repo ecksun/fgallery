@@ -17,7 +17,7 @@ def copy_template_files(destination):
 
 
 def process_image(image: Image, input_dir, output_dir):
-    relative_path = path.relpath(image.path, input_dir)
+    relative_path = path.relpath(image.original.path, input_dir)
     relative_dir = path.dirname(relative_path)
 
     create_folders(output_dir, relative_dir)

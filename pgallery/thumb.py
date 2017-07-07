@@ -8,7 +8,8 @@ max_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
 
 def create(image: Image, output_folder, relative_dir):
-    destination = path.join(output_folder, 'thumbs', relative_dir, path.basename(image.path))
+    destination = path.join(output_folder, 'thumbs', relative_dir,
+                            path.basename(image.original.path))
 
     if image.size.x / image.size.y < min_size.x / min_size.y:
         thumb_ratio = min_size.x / image.size.x
@@ -33,7 +34,7 @@ def create(image: Image, output_folder, relative_dir):
     cy = clamp(0, dy, int(center.y * sthumb.y - sthumb.y / 2 + dy / 2))
 
     cmd = ['convert',
-           '-quiet', image.path,
+           '-quiet', image.original.path,
            '-gamma', '0.454545',
            '-resize', '%sx%s!' % (sthumb.x, sthumb.y),
            '-gravity', 'NorthWest',

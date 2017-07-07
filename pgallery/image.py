@@ -3,6 +3,14 @@ from datetime import datetime
 import exifread
 from collections import namedtuple
 
+Dimension = namedtuple('Dimension', 'x y')
+
+
+class ImageFile:
+    def __init__(self, path, size: Dimension):
+        self.path = path
+        self.size = size
+
 
 class Image:
     @staticmethod
@@ -10,9 +18,15 @@ class Image:
         with open(image, 'rb') as fd:
             return exifread.process_file(fd, details=False)
 
-    def __init__(self, image_path):
-        self.path = image_path
-        self.exif_tags = Image.get_exif(self.path)
+    def __init__(self, image_path, exif_tags):
+        self.exif_tags = exif_tags
+        self.original = ImageFile(image_path, self.size)
+
+    @classmethod
+    def from_path(cls, image_path):
+        exif_tags = Image.get_exif(image_path)
+        instance = cls(image_path, exif_tags)
+        return instance
 
     @property
     def size(self):
@@ -29,4 +43,3 @@ class Image:
         return None
 
 
-Dimension = namedtuple('Dimension', 'x y')
