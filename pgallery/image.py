@@ -43,3 +43,7 @@ class Image:
         return None
 
 
+class ScaledownImage(Image):
+    def __init__(self, image: Image, scaledown_path, size):
+        super(ScaledownImage, self).__init__(image.original.path, image.exif_tags)
+        self.scaledown = ImageFile(scaledown_path, size)

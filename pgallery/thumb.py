@@ -1,23 +1,24 @@
 from os import path
+from pgallery.image import Dimension, ScaledownImage
 from pgallery.sys import execute
-from pgallery.image import Image, Dimension
 
 thumb_quality = 90
 min_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
 max_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
 
-def create(image: Image, output_folder, relative_dir):
+def create(image: ScaledownImage, output_folder, relative_dir):
+    working_image = image.scaledown
     destination = path.join(output_folder, 'thumbs', relative_dir,
-                            path.basename(image.original.path))
+                            path.basename(working_image.path))
 
-    if image.size.x / image.size.y < min_size.x / min_size.y:
-        thumb_ratio = min_size.x / image.size.x
+    if working_image.size.x / working_image.size.y < min_size.x / min_size.y:
+        thumb_ratio = min_size.x / working_image.size.x
     else:
-        thumb_ratio = min_size.y / image.size.y
+        thumb_ratio = min_size.y / working_image.size.y
 
-    sthumb = Dimension(max(round(image.size.x * thumb_ratio), min_size.x),
-                       max(round(image.size.y * thumb_ratio), min_size.y))
+    sthumb = Dimension(max(round(working_image.size.x * thumb_ratio), min_size.x),
+                       max(round(working_image.size.y * thumb_ratio), min_size.y))
 
     mthumb = Dimension(min(max_size.x, sthumb.x), min(max_size.y, sthumb.y))
 
@@ -34,7 +35,7 @@ def create(image: Image, output_folder, relative_dir):
     cy = clamp(0, dy, int(center.y * sthumb.y - sthumb.y / 2 + dy / 2))
 
     cmd = ['convert',
-           '-quiet', image.original.path,
+           '-quiet', working_image.path,
            '-gamma', '0.454545',
            '-resize', '%sx%s!' % (sthumb.x, sthumb.y),
            '-gravity', 'NorthWest',

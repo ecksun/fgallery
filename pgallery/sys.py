@@ -9,4 +9,4 @@ def executable_exists(executable):
 
 def execute(cmd):
     print(cmd)
-    return subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
+    return subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)

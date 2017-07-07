@@ -22,11 +22,12 @@ def process_image(image: Image, input_dir, output_dir):
 
     create_folders(output_dir, relative_dir)
 
-    scaledown_size = scaledown.create(image, output_dir, relative_dir)
-    thumb_size = thumb.create(image, output_dir, relative_dir)
+    scaledown_image = scaledown.create(image, output_dir, relative_dir)
+    thumb_size = thumb.create(scaledown_image, output_dir, relative_dir)
     original.create(image, output_dir, relative_dir)
 
-    return create_datadto(relative_path, scaledown_size, thumb_size, image.size, image.taken_date)
+    return create_datadto(relative_path, scaledown_image.scaledown.size, thumb_size, image.size,
+                          image.taken_date)
 
 
 def create_folders(output_dir, target_dir):
