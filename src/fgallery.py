@@ -2,17 +2,19 @@
 
 import argparse
 import json
+import subprocess
 import sys
 from datetime import datetime
 from typing import Optional
-
-import subprocess
 
 import exifread
 import os
 import shutil
 from collections import namedtuple
 from os import path
+from src.original import create_original
+from src.scaledown import create_scaledown
+from src.thumb import create_thumb
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 
@@ -131,81 +133,9 @@ def process_image(image_path):
     return create_datadto(relative_path, scaledown_size, thumb_size, image.size, image.taken_date)
 
 
-def create_original(image: Image, relative_dir):
-    shutil.copy(image.path, path.join(args.output, 'files', relative_dir))
-
-
-def create_thumb(image: Image, relative_dir):
-    thumb_quality = 90
-    min_thumb_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
-    max_thumb_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
-
-    destination = path.join(args.output, 'thumbs', relative_dir, path.basename(image.path))
-
-    if image.size.x / image.size.y < min_thumb_size.x / min_thumb_size.y:
-        thumb_ratio = min_thumb_size.x / image.size.x
-    else:
-        thumb_ratio = min_thumb_size.y / image.size.y
-
-    sthumb = Dimension(max(round(image.size.x * thumb_ratio), min_thumb_size.x),
-                       max(round(image.size.y * thumb_ratio), min_thumb_size.y))
-
-    mthumb = Dimension(min(max_thumb_size.x, sthumb.x), min(max_thumb_size.y, sthumb.y))
-
-    # face/center detection
-    center = Dimension(0.5, 0.5)
-
-    def clamp(a, b, v):
-        return max(a, min(b, v))
-
-    # cropping window
-    dx = sthumb.x - mthumb.x
-    cx = clamp(0, dx, int(center.x * sthumb.x - sthumb.x / 2 + dx / 2))
-    dy = sthumb.y - mthumb.y
-    cy = clamp(0, dy, int(center.y * sthumb.y - sthumb.y / 2 + dy / 2))
-
-    cmd = ['convert',
-           '-quiet', image.path,
-           '-gamma', '0.454545',
-           '-resize', '%sx%s!' % (sthumb.x, sthumb.y),
-           '-gravity', 'NorthWest',
-           '-crop', '%sx%s+%s+%s' % (mthumb.x, mthumb.y, cx, cy),
-           '-gamma', '2.2',
-           '+profile', '!icc,*',
-           '-quality', str(thumb_quality),
-           destination
-           ]
-    execute(cmd)
-    return mthumb
-
-
 def execute(cmd):
     print(cmd)
     return subprocess.run(cmd, stdout=subprocess.PIPE, check=True)
-
-
-def create_scaledown(image: Image, relative_dir):
-    max_full_size = Dimension(1600, 1200)
-    image_quality = 90
-
-    destination = path.join(args.output, 'imgs', relative_dir, path.basename(image.path))
-
-    cmd = ['convert',
-           '-quiet',
-           image.path,
-           '-gamma', '0.454545',
-           '-geometry', '%sx%s>' % (max_full_size.x, max_full_size.y),
-           '-print', '%w %h',
-           '-gamma', '2.2',
-           '+profile', '!icc,*',
-           '-quality',
-           str(image_quality),
-           destination
-    ]
-    completed_process = execute(cmd)
-    (width_bytes, height_bytes) = completed_process.stdout.split(b' ')
-
-    return Dimension(int(width_bytes), int(height_bytes))
 
 
 def main():
