@@ -1,13 +1,14 @@
 from os import path
-from src.fgallery import Image, Dimension, args, execute
+from pgallery.sys import execute
+from pgallery.image import Image, Dimension
 
 thumb_quality = 90
 min_thumb_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
 max_thumb_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
 
-def create_thumb(image: Image, relative_dir):
-    destination = path.join(args.output, 'thumbs', relative_dir, path.basename(image.path))
+def create_thumb(image: Image, output_folder, relative_dir):
+    destination = path.join(output_folder, 'thumbs', relative_dir, path.basename(image.path))
 
     if image.size.x / image.size.y < min_thumb_size.x / min_thumb_size.y:
         thumb_ratio = min_thumb_size.x / image.size.x

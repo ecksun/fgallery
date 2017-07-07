@@ -1,12 +1,13 @@
 from os import path
-from src.fgallery import Image, Dimension, args, execute
+from pgallery.sys import execute
+from pgallery.image import Image, Dimension
 
 
-def create_scaledown(image: Image, relative_dir):
+def create_scaledown(image: Image, output_folder, relative_dir):
     max_full_size = Dimension(1600, 1200)
     image_quality = 90
 
-    destination = path.join(args.output, 'imgs', relative_dir, path.basename(image.path))
+    destination = path.join(output_folder, 'imgs', relative_dir, path.basename(image.path))
 
     cmd = ['convert',
            '-quiet',
