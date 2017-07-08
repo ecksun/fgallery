@@ -13,6 +13,7 @@ parser.add_argument('input', help='Input directory')
 parser.add_argument('output', help='Output directory to write gallery to')
 parser.add_argument('--link-original', help='Method for linking to the original file',
                     default='symlink', choices=['symlink', 'hardlink', 'copy'])
+parser.add_argument('--verbose', help='Show verbose output', action='store_true')
 
 args = parser.parse_args()
 
@@ -45,7 +46,6 @@ def valid_image(image: Image):
 def main(config):
     images = [Image.from_path(image_path) for image_path in images_to_process(config.input_folder)]
     valid_images = [image for image in images if valid_image(image)]
-    print(dir(fgallery))
     fgallery.copy_template_files(config.output_folder)
     fgallery.process_and_save(valid_images, config)
 

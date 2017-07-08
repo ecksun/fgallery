@@ -11,3 +11,7 @@ class Config:
     @property
     def output_folder(self):
         return self.args.output
+
+    @property
+    def verbose(self):
+        return self.args.verbose

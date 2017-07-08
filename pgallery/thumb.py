@@ -1,4 +1,5 @@
 from os import path
+from pgallery.config import Config
 from pgallery.image import Dimension, ScaledownImage, ThumbImage
 from pgallery.sys import execute
 
@@ -7,7 +8,7 @@ min_size = Dimension(150.0, 112.0)  # Use floats for floating precision below
 max_size = Dimension(267.0, 200.0)  # Use floats for floating precision below
 
 
-def create(image: ScaledownImage, output_folder, relative_dir):
+def create(image: ScaledownImage, output_folder, relative_dir, config: Config):
     working_image = image.scaledown
     destination = path.join(output_folder, 'thumbs', relative_dir,
                             path.basename(working_image.path))
@@ -45,5 +46,5 @@ def create(image: ScaledownImage, output_folder, relative_dir):
            '-quality', str(thumb_quality),
            destination
            ]
-    execute(cmd)
+    execute(cmd, config)
     return ThumbImage(image, destination, mthumb)

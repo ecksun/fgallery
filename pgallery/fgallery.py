@@ -27,10 +27,10 @@ def process_image(image: Image, config: Config):
 
     create_folders(config.output_folder, relative_dir)
 
-    scaledown_image = scaledown.create(image, config.output_folder, relative_dir)
-    thumb_image = thumb.create(scaledown_image, config.output_folder, relative_dir)
+    scaledown_image = scaledown.create(image, config.output_folder, relative_dir, config)
+    thumb_image = thumb.create(scaledown_image, config.output_folder, relative_dir, config)
     original.create(image, config.output_folder, relative_dir, config)
-    blur.create(thumb_image, config.output_folder, relative_dir)
+    blur.create(thumb_image, config.output_folder, relative_dir, config)
 
     return create_datadto(relative_path, scaledown_image.scaledown.size, thumb_image.thumb.size,
                           image.size, image.taken_date)

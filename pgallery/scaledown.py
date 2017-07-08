@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import os
 import shutil
 from os import path
+from pgallery.config import Config
 from pgallery.orient import orient
 from pgallery.sys import execute
 from pgallery.image import Image, Dimension, ScaledownImage
@@ -16,7 +17,7 @@ def file_copy(file_path, dest):
     os.remove(tmp_file_path)
 
 
-def create(image: Image, output_folder, relative_dir):
+def create(image: Image, output_folder, relative_dir, config: Config):
     max_full_size = Dimension(1600, 1200)
     image_quality = 90
 
@@ -24,12 +25,12 @@ def create(image: Image, output_folder, relative_dir):
                             path.basename(image.original.path))
 
     with file_copy(image.original.path, destination) as tmp_path:
-        orient(tmp_path)
-        size = scale_image(destination, tmp_path, image_quality, max_full_size)
+        orient(tmp_path, config)
+        size = scale_image(destination, tmp_path, image_quality, max_full_size, config)
         return ScaledownImage(image, destination, size)
 
 
-def scale_image(destination, image_path, image_quality, max_full_size):
+def scale_image(destination, image_path, image_quality, max_full_size, config: Config):
     cmd = ['convert',
            '-quiet',
            image_path,
@@ -41,6 +42,6 @@ def scale_image(destination, image_path, image_quality, max_full_size):
            '-quality', str(image_quality),
            destination
            ]
-    completed_process = execute(cmd)
+    completed_process = execute(cmd, config)
     (width_bytes, height_bytes) = completed_process.stdout.split(b' ')
     return Dimension(int(width_bytes), int(height_bytes))
