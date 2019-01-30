@@ -17,7 +17,8 @@ from pgallery.image import Image
 def copy_template_files(destination):
     root_folder = path.join(path.dirname(path.abspath(__file__)), path.pardir)
     template_dir = path.join(root_folder, 'view')
-    shutil.rmtree(destination)
+    if path.exists(destination):
+        shutil.rmtree(destination)
     shutil.copytree(template_dir, destination)
 
 
