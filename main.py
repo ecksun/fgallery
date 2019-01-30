@@ -29,8 +29,9 @@ def files_in_dir(directory):
 
 
 def images_to_process(directory):
-    for file in files_in_dir(directory):
-        yield file
+    for f in files_in_dir(directory):
+        if not path.basename(f).startswith('.'):
+            yield f
 
 
 def valid_image(image: Image):
