@@ -14,7 +14,7 @@ def create_thumbdto(min_size: Dimension, max_size: Dimension):
 def create_rootdto(images, thumb, blur: Dimension):
     return {
         'version': '1.8.2',
-        'data': images,
+        'data': sorted(images, key=lambda img: img['date']),
         'thumb': thumb,
         'blur': blur
     }
