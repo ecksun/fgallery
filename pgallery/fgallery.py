@@ -19,8 +19,8 @@ def copy_template_files(destination):
     template_dir = path.join(root_folder, 'view')
     if path.exists(destination):
         shutil.rmtree(destination)
-    shutil.copytree(template_dir, destination)
-
+    shutil.copytree(template_dir, path.join(destination, 'view'))
+    os.symlink(path.join('view', 'index.html'), path.join(destination, 'index.html'))
 
 def process_image(image: Image, config: Config):
     relative_path = path.relpath(image.original.path, config.input_folder)

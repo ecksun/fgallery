@@ -1,10 +1,16 @@
-/* General reset */
 html, body
 {
   overflow: hidden; /* IE<9 */
   padding: 0;
   margin: 0;
   border: 0;
+  height: 100.1% /* IOS>7.1 meta viewport minimal-ui to hide menu + bars */
+}
+
+body
+{
+  overflow: scroll;
+  background-color: #eee;
 }
 
 img
@@ -110,6 +116,7 @@ img
   background: #111; /* IE<9 */
   background: rgba(0, 0, 0, 0.7);
   font-family: sans-serif;
+  font-size: 80%;
   padding: 0.5em;
 }
 
@@ -342,4 +349,22 @@ img
 #gallery #list .thumb.movie .ovr
 {
   background: url(cut-mov.png) top left repeat-y, url(cut-mov.png) top right repeat-y;
+}
+
+/* noscript style */
+#wrapper {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    line-height: 0;
+}
+
+#photos {
+    padding: 10px;
+}
+
+#photos img {
+  width: 100%;
+  height: auto
+  object-fit: cover;
 }
